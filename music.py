@@ -28,15 +28,21 @@ class music(commands.Cog):
             'before_options': '-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5',
             'options': '-vn'
         }
-        ydl_opts = {'format': 'besaudio'}
+        ydl_opts = {'format': 'bestaudio'}
         voice_chat = ctx.voice_client
 
-        with youtube_dl.Youtube(YDL_OPTIONS) as ydl:
+        with youtube_dl.YoutubeDL(ydl_opts) as ydl:
             info = ydl.extract_info(url, download=False)
-            url2 = info('formats')[0]['url']
-            source = await discord.flatten_error_dict
-            source = lol
+            url2 = info['formats'][0]['url']
+            source = await discord.FFmpegOpusAudio.from_probe(url2, **ffmpeg_opts)
+            voice_chat.play(source)
 
+    @commands.command()
+    async def pause(self, ctx):
+        await ctx.voice_client.pause()
+        await ctx.send("Paused...")
 
-def setup(client):
-    client.add_cog(music(client))
+    @commands.command()
+    async def resume(self, ctx):
+        await ctx.voice_client.resume()
+        await ctx.send("Resume")
